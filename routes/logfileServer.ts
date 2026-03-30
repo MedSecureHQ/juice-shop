@@ -11,7 +11,14 @@ export function serveLogFiles () {
     const file = params.file
 
     if (!file.includes('/')) {
-      res.sendFile(path.resolve('logs/', file))
+      const logDir = path.resolve('logs/')
+      const resolvedPath = path.resolve('logs/', file)
+      if (!resolvedPath.startsWith(logDir + path.sep)) {
+        res.status(403)
+        next(new Error('File access not allowed'))
+        return
+      }
+      res.sendFile(resolvedPath)
     } else {
       res.status(403)
       next(new Error('File names cannot contain forward slashes!'))
