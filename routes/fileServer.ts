@@ -29,7 +29,14 @@ export function servePublicFiles () {
       challengeUtils.solveIf(challenges.directoryListingChallenge, () => { return sanitizedFile.toLowerCase() === 'acquisitions.md' })
       verifySuccessfulPoisonNullByteExploit(sanitizedFile)
 
-      res.sendFile(path.resolve('ftp/', sanitizedFile))
+      const filePath = path.resolve('ftp/', sanitizedFile)
+      const ftpRoot = path.resolve('ftp/')
+      if (!filePath.startsWith(ftpRoot)) {
+        res.status(403)
+        next(new Error('File names cannot contain forward slashes!'))
+        return
+      }
+      res.sendFile(filePath)
     } else {
       res.status(403)
       next(new Error('Only .md and .pdf files are allowed!'))
