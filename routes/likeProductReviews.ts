@@ -15,7 +15,10 @@ const sleep = async (ms: number) => await new Promise(resolve => setTimeout(reso
 
 export function likeProductReviews () {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const id = String(req.body.id)
+    const id = String(req.body.id).replace(/[^\w-]+/g, '')
+    if (!id) {
+      return res.status(400).json({ error: 'Invalid id' })
+    }
     const user = security.authenticatedUsers.from(req)
     if (!user) {
       return res.status(401).json({ error: 'Unauthorized' })
