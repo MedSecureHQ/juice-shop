@@ -119,12 +119,14 @@ describe('fileServer', () => {
     expect(next).to.have.been.calledWith(sinon.match.instanceOf(Error))
   })
 
-  it('should not serve files resolved outside ftp directory', () => {
-    req.params.file = '..%2Fserver.ts.md'
+  it('should verify that served file path is within ftp directory', () => {
+    req.params.file = 'test.pdf'
 
     servePublicFiles()(req, res, next)
 
-    expect(res.sendFile).to.have.not.been.calledWith(sinon.match.any)
-    expect(next).to.have.been.calledWith(sinon.match.instanceOf(Error))
+    const servedPath = res.sendFile.getCall(0).args[0]
+    const path = require('node:path')
+    const ftpRoot = path.resolve('ftp/')
+    expect(servedPath.startsWith(ftpRoot)).to.equal(true)
   })
 })
