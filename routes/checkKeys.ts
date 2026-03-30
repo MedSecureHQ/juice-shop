@@ -3,6 +3,7 @@ import { HDNodeWallet } from 'ethers'
 import * as challengeUtils from '../lib/challengeUtils'
 import * as utils from '../lib/utils'
 import { challenges } from '../data/datacache'
+import logger from '../lib/logger'
 
 export function checkKeys () {
   return (req: Request, res: Response) => {
@@ -27,7 +28,8 @@ export function checkKeys () {
         }
       }
     } catch (error) {
-      res.status(500).json(utils.getErrorMessage(error))
+      logger.error('Error in checkKeys: ' + utils.getErrorMessage(error))
+      res.status(500).json({ error: 'An unexpected error occurred.' })
     }
   }
 }
@@ -36,7 +38,8 @@ export function nftUnlocked () {
     try {
       res.status(200).json({ status: challenges.nftUnlockChallenge.solved })
     } catch (error) {
-      res.status(500).json(utils.getErrorMessage(error))
+      logger.error('Error in nftUnlocked: ' + utils.getErrorMessage(error))
+      res.status(500).json({ error: 'An unexpected error occurred.' })
     }
   }
 }
