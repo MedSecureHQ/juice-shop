@@ -80,6 +80,42 @@ describe('searchProducts', () => {
     expect(callArgs[1].replacements.criteria).to.have.lengthOf(200)
   })
 
+  it('should coerce array query parameter to first element string', async () => {
+    queryStub.resolves([[], []])
+    req.query.q = ['apple', 'banana']
+
+    searchProducts()(req, res, next)
+
+    await new Promise(resolve => setTimeout(resolve, 50))
+    expect(queryStub).to.have.been.calledOnce // eslint-disable-line @typescript-eslint/no-unused-expressions
+    const callArgs = queryStub.firstCall.args
+    expect(callArgs[1]).to.deep.include({ replacements: { criteria: 'apple' } })
+  })
+
+  it('should handle empty array query parameter gracefully', async () => {
+    queryStub.resolves([[], []])
+    req.query.q = []
+
+    searchProducts()(req, res, next)
+
+    await new Promise(resolve => setTimeout(resolve, 50))
+    expect(queryStub).to.have.been.calledOnce // eslint-disable-line @typescript-eslint/no-unused-expressions
+    const callArgs = queryStub.firstCall.args
+    expect(callArgs[1]).to.deep.include({ replacements: { criteria: '' } })
+  })
+
+  it('should coerce numeric query parameter to string', async () => {
+    queryStub.resolves([[], []])
+    req.query.q = 123 as any
+
+    searchProducts()(req, res, next)
+
+    await new Promise(resolve => setTimeout(resolve, 50))
+    expect(queryStub).to.have.been.calledOnce // eslint-disable-line @typescript-eslint/no-unused-expressions
+    const callArgs = queryStub.firstCall.args
+    expect(callArgs[1]).to.deep.include({ replacements: { criteria: '123' } })
+  })
+
   it('should call next with error parent on query failure', async () => {
     const parentError = new Error('db error')
     const error = Object.assign(new Error('query failed'), { parent: parentError })
